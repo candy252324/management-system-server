@@ -1,10 +1,10 @@
 var express =require("express");
 var router =express.Router();
-var Users=require("../models/users");
+var Roles=require("../models/roles");
 
 router.get("/",function(req,res,next){
   console.log(req.query)
-  Users.find({},function(err,doc){
+  Roles.find({},function(err,doc){
     if(err){
       res.json({
         status:1,
