@@ -2,9 +2,9 @@ var mongoose=require("mongoose")
 var Schema=mongoose.Schema;
 var schema=new Schema({
     "_id": String,
+    "name": String,
     "account":String,
     "password":String,
-    "name": String,
     "gender": Boolean,
     "role": String,      //角色id
     "avatar": String,

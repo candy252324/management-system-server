@@ -5,10 +5,7 @@ var Role=require("../models/role");
 router.get("/list",function(req,res,next){
   Role.find({},function(err,doc){
     if(err){
-      res.json({
-        code:1,
-        msg:err.message,
-      })
+      res.json({ code:1})
     }else{
       const { page, limit, prop ,order,searchWord } = req.query
       let list=doc;
@@ -45,8 +42,14 @@ router.post("/submit",function(req,res,next){
 })
 
 router.post("/del",function(req,res,next){
-  console.log(req.body)
-  res.json({ code:0 })
+  let whereStr=req.body;
+  Role.remove(whereStr,function(err,doc){
+    if(err){
+      console.log(err)
+    }else{
+      res.json({ code:0 })
+    }
+  })
 })
 
 router.get("/options",function(req,res,next){
