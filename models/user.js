@@ -1,7 +1,6 @@
 var mongoose=require("mongoose")
 var Schema=mongoose.Schema;
 var schema=new Schema({
-    "_id": String,
     "name": String,
     "account":String,
     "password":String,

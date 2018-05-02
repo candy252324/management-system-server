@@ -29,17 +29,24 @@ router.get("/list",function(req,res,next){
 })
 
 router.post("/submit",function(req,res,next){
-  console.log(req.body)
-  // var doc1 = new Role({ name: 'small' ,grade:1});
-  // doc1.save(function (err,doc) {
-  //   console.log(doc)
-  // })
-  User.create(req.body,function(err,doc1,doc2){
-    console.log(err)
-    console.log(doc1)
-    console.log(doc2)
-  })
-  res.json({ code:0 })
+  if(!req.body._id){
+    let insert=new User(req.body)
+    insert.save(function (err) {
+      if(err){
+        res.json({code:1,msg:err.message})
+      }else{
+        res.json({code:0})
+      }
+    })
+  }else{
+    User.update({_id:req.body._id},req.body,function(err,result){
+      if(err){
+        res.json({code:1,msg:err.message})
+      }else{
+        res.json({code:0})
+      }
+    });
+  }
 })
 
 router.post("/del",function(req,res,next){
