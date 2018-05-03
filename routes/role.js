@@ -3,32 +3,46 @@ var router =express.Router();
 var Role=require("../models/role");
 
 router.get("/list",function(req,res,next){
-  Role.find({},function(err,doc){
+  let { page, limit, prop ,order,searchWord } = req.query;
+  page=parseInt(page);
+  limit=parseInt(limit);
+  var req=new RegExp(searchWord);
+  let skip=(page-1)*limit;
+  let total;
+  Role.find({
+    $or:[
+      {name:{$regex:req}},
+    ]
+  },function (err,doc) {
     if(err){
-      res.json({ code:1})
+      console.log(err)
     }else{
-      const { page, limit, prop ,order,searchWord } = req.query
-      let list=doc;
-      if (order === 'descending') {
-        list = doc.reverse()
-      }
-      if(searchWord){
-        list=list.filter((item)=>{
-          return item.name.indexOf(searchWord)>-1;
-        })
-      }
-      const pageList = list.filter((item, index) => index < limit * page && index >= limit * (page - 1))
-      var obj={list:pageList,total:list.length}
+      total=doc.length;
+    }
+  })
+  let d=Role.find({
+    $or:[
+      {name:{$regex:req}},
+    ]
+  }).skip(skip).limit(limit);
+  d.sort({"createdAt":-1})
+  d.exec(function (err,doc) {
+    if(err){
+      console.log(err)
+      res.json({ code:1,msg:err.message})
+    }else{
       res.json({
         code:0,
-        result:obj
+        result:{
+          list:doc,
+          total:total,
+        }
       })
     }
   })
 })
 
 router.post("/submit",function(req,res,next){
-  console.log(req.body)
   if(!req.body._id){
     let insert=new Role(req.body)
     insert.save(function (err) {
@@ -39,7 +53,7 @@ router.post("/submit",function(req,res,next){
       }
     })
   }else{
-    Role.update({_id:req.body._id},req.body,function(err,result){
+    Role.update({_id:req.body._id},{name:req.body.name,grade:req.body.grade,extra:req.body.extra},function(err,result){
       if(err){
         res.json({code:1,msg:err.message})
       }else{

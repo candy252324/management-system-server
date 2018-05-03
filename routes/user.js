@@ -3,26 +3,42 @@ var router =express.Router();
 var User=require("../models/user");
 
 router.get("/list",function(req,res,next){
-  User.find({},function(err,doc){
+  let { page, limit, prop ,order,searchWord } = req.query;
+  page=parseInt(page);
+  limit=parseInt(limit);
+  var req=new RegExp(searchWord,"i");
+  let skip=(page-1)*limit;
+  let total;
+  User.find({
+    $or:[
+      {name:{$regex:req}},
+      {account:{$regex:req}},
+    ]
+  },function (err,doc) {
     if(err){
-      res.json({ code:1})
+      console.log(err)
     }else{
-      const { page, limit, prop ,order,searchWord } = req.query
-      let list=doc;
-      if (order === 'descending') {
-        list = doc.reverse()
-      }
-      if(searchWord){
-        list=list.filter((item)=>{
-          return item.account.indexOf(searchWord)>-1
-            ||item.name.indexOf(searchWord)>-1;
-        })
-      }
-      const pageList = list.filter((item, index) => index < limit * page && index >= limit * (page - 1))
-      var obj={list:pageList,total:list.length}
+      total=doc.length;
+    }
+  })
+  let d=User.find({
+    $or:[
+      {name:{$regex:req}},
+      {account:{$regex:req}},
+    ]
+  }).skip(skip).limit(limit);
+  d.sort({"createdAt":-1})
+  d.exec(function (err,doc) {
+    if(err){
+      console.log(err)
+      res.json({ code:1,msg:err.message})
+    }else{
       res.json({
         code:0,
-        result:obj
+        result:{
+          list:doc,
+          total:total,
+        }
       })
     }
   })
